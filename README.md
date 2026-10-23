@@ -56,10 +56,6 @@ Lite 版是免费自助版。**全功能版**由作者远程部署到你的服�
 
 👉 在 Telegram 找 **[@NebulaGuardCNBot](https://t.me/NebulaGuardCNBot)**（星穹哨兵 NEBULA），点 `/buy` 即可下单，全程按钮操作。
 
----
-
-*本项目由作者与他的 AI 助理 [Muse](https://muse.ai/join) 协作维护。想拥有同款助理，用邀请码 `VL5IEH` 注册，48 小时内在设置里兑换，我们各得一份词元奖励。*
-
 ## License
 
 MIT
