@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>星穹哨兵 NEBULA · 给你的 VPS 装个哨兵</title>
+<meta name="description" content="VPS 守护机器人：SSH 登录实时告警、fail2ban 联动、每日服务器日报。Telegram 远程部署服务。">
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; background: #0b1020; color: #e6e9f2; font-family: system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; line-height: 1.65; }
+.wrap { max-width: 760px; margin: 0 auto; padding: 0 20px 80px; }
+.topbar { position: sticky; top: 0; z-index: 10; background: rgba(11,16,32,.88); backdrop-filter: blur(8px); border-bottom: 1px solid #1d2540; }
+.topbar-in { max-width: 760px; margin: 0 auto; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; }
+.logo { font-weight: 800; font-size: 16px; text-decoration: none; color: #e6e9f2; }
+.logo span { color: #34d399; }
+.btn { display: inline-block; text-decoration: none; font-weight: 600; border-radius: 10px; padding: 10px 18px; font-size: 15px; }
+.btn-primary { background: #229ed9; color: #fff; }
+.btn-ghost { border: 1px solid #3a4767; color: #dbe2f0; }
+.btn-sm { padding: 8px 14px; font-size: 14px; }
+.hero { text-align: center; padding: 64px 0 8px; background: radial-gradient(600px 300px at 50% -40px, rgba(52,211,153,.14), transparent 70%); }
+.badge { display: inline-block; font-size: 14px; color: #8fb4ff; border: 1px solid #2b3a5e; border-radius: 999px; padding: 4px 12px; }
+h1 { font-size: 40px; line-height: 1.2; margin: 20px 0 14px; }
+h1 .grad { background: linear-gradient(90deg, #34d399, #6ea8fe); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.lead { font-size: 18px; color: #b9c0d0; margin: 0 auto 26px; max-width: 560px; }
+.btns { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin: 0 0 12px; }
+.note { font-size: 13px; color: #8b93a7; }
+.eyebrow { font-size: 13px; font-weight: 700; letter-spacing: .12em; color: #34d399; text-transform: uppercase; margin: 56px 0 4px; }
+h2 { font-size: 26px; margin: 4px 0 8px; }
+h3 { font-size: 18px; margin: 0 0 6px; }
+p { margin: 8px 0; }
+.muted { color: #9aa3b2; }
+.center { text-align: center; }
+.card { background: #141a2e; border: 1px solid #232c47; border-radius: 14px; padding: 18px 20px; margin: 14px 0; }
+.grid2 { display: grid; gap: 14px; }
+@media (min-width: 640px) { .grid2 { grid-template-columns: 1fr 1fr; } .grid2 .card { margin: 0; } }
+.pricing { display: grid; gap: 14px; }
+@media (min-width: 820px) { .pricing { grid-template-columns: 1fr 1fr 1fr; } .pricing .card { margin: 0; display: flex; flex-direction: column; } }
+.card.featured { border-color: #34d399; }
+ul { margin: 8px 0; padding-left: 20px; }
+li { margin: 6px 0; }
+code { background: #1d2540; border-radius: 6px; padding: 1px 6px; font-size: 14px; }
+.price { font-size: 30px; font-weight: 800; margin: 6px 0; }
+.tag { display: inline-block; font-size: 12px; font-weight: 700; color: #0b1020; background: #34d399; border-radius: 6px; padding: 2px 8px; vertical-align: middle; margin-left: 8px; }
+.tag.hot { background: #fbbf24; }
+.phone { max-width: 420px; margin: 24px auto; border: 1px solid #2b3a5e; border-radius: 22px; background: #0f1526; overflow: hidden; }
+.phone-head { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-bottom: 1px solid #232c47; font-weight: 700; }
+.dot { width: 9px; height: 9px; border-radius: 50%; background: #34d399; }
+.phone-head small { margin-left: auto; color: #8b93a7; font-weight: 400; }
+.phone-body { padding: 6px 14px 14px; }
+.chat { background: #1a2138; border: 1px solid #232c47; border-radius: 12px; padding: 12px 14px; margin: 10px 0; font-size: 14px; white-space: pre-wrap; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; line-height: 1.55; }
+.steps { counter-reset: s; list-style: none; padding: 0; }
+.steps li { counter-increment: s; position: relative; padding-left: 44px; margin: 16px 0; }
+.steps li::before { content: counter(s); position: absolute; left: 0; top: 0; width: 30px; height: 30px; border-radius: 50%; background: #229ed9; color: #fff; font-weight: 700; text-align: center; line-height: 30px; }
+.faq p { margin: 4px 0 16px; }
+.sticky-cta { display: none; position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; background: rgba(11,16,32,.94); border-top: 1px solid #232c47; padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); }
+.sticky-cta .btn { flex: 1; text-align: center; }
+@media (max-width: 640px) { .sticky-cta { display: flex; gap: 10px; } h1 { font-size: 32px; } }
+footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid #232c47; font-size: 13px; color: #8b93a7; }
+a { color: #8fb4ff; }
+</style>
+</head>
+<body>
+<header class="topbar"><div class="topbar-in">
+<a class="logo" href="#top">🛡 星穹哨兵 <span>NEBULA</span></a>
+<a class="btn btn-primary btn-sm" href="https://t.me/NebulaGuardCNBot">Telegram 下单</a>
+</div></header>
+<div class="wrap" id="top">
+
+<div class="hero">
+<span class="badge">VPS 守护机器人 · 远程部署</span>
+<h1>给你的 VPS<br>装个<span class="grad">哨兵</span></h1>
+<p class="lead">有人 SSH 登录、有人被 fail2ban 封掉、磁盘快满了——第一时间在 Telegram 里通知你，每天早上再送一份服务器日报。</p>
+<div class="btns">
+<a class="btn btn-primary" href="https://t.me/NebulaGuardCNBot">Telegram 下单 @NebulaGuardCNBot</a>
+<a class="btn btn-ghost" href="https://github.com/xiaobai111-hub/vps-guard-lite">Lite 免费版 · GitHub</a>
+</div>
+<p class="note">作者自己的主力 VPS 上 24×7 跑着同款，功能实测过，不是 PPT 产品。</p>
+</div>
+
+<p class="eyebrow center">真实输出</p>
+<h2 class="center">它发来的消息长这样</h2>
+<p class="muted center">以下为 Lite 版真实输出格式，IP 已脱敏。</p>
+<div class="phone">
+<div class="phone-head"><span class="dot"></span>星穹哨兵<small>在线</small></div>
+<div class="phone-body">
+<div class="chat">🔐 SSH 登录成功
+用户: root
+来源: 101.205.*.*</div>
+<div class="chat">🚫 fail2ban 新封禁: 45.148.*.*</div>
+<div class="chat">🖥 服务器状态
+运行: up 6 days, 3 hours
+负载: 0.08 0.05 0.01
+内存: 412/961 MB (43%)
+磁盘: 8.2G/20G (43%)
+公网IP: 23.94.*.*</div>
+<div class="chat">🩺 一键体检
+服务 sshd: active
+服务 fail2ban: active
+服务 xray: active
+监听端口: 22 443 2022
+24h SSH: 成功 3 次 / 失败 1,284 次
+磁盘使用: 43%</div>
+</div>
+</div>
+<p class="muted center">“24 小时失败 1,284 次”——每个 VPS 玩家都知道，自己的机器天天被扫。</p>
+
+<p class="eyebrow">为什么需要</p>
+<h2>你的 VPS 天天被扫，你可能不知道</h2>
+<p>作者自己的服务器，<strong>十来天记了 11 万行失败登录记录</strong>。半夜被爆破 SSH、磁盘悄悄写满、流量跑超了才收到账单——这套机器人就是解决这个的。</p>
+<p class="muted">👉 事情的来龙去脉写在<a href="https://eleduck.com/posts/K7fazq">这篇帖子</a>里：翻了下服务器日志，十来天记了 11 万行失败记录，我给它配了个哨兵。</p>
+
+<p class="eyebrow">功能</p>
+<h2>它能干什么</h2>
+<div class="grid2">
+<div class="card">
+<h3>随时问它</h3>
+<ul>
+<li><code>/status</code> — 运行时间、负载、内存、磁盘、公网 IP</li>
+<li><code>/doctor</code> — 一键体检：服务状态、监听端口、24 小时登录成功 / 失败统计</li>
+<li><code>/bans</code> — fail2ban 当前封禁列表</li>
+</ul>
+</div>
+<div class="card">
+<h3>它主动找你</h3>
+<ul>
+<li>有人 SSH 登录成功 → 立刻推送，来源 IP 一眼可见</li>
+<li>fail2ban 新封禁 → 实时通知</li>
+<li>磁盘 ≥85% → 告警</li>
+<li>每天 08:00 → 一份服务器日报，不用自己登服务器看</li>
+</ul>
+</div>
+<div class="card">
+<h3>全功能版另有</h3>
+<ul>
+<li>流量月账本与超额预警</li>
+<li>配置变更看门狗：关键文件被改立刻告警</li>
+<li>全链路自检：每天自动验证核心服务真的通</li>
+<li>到期提醒管家：服务器、域名续费不再过期</li>
+</ul>
+</div>
+<div class="card">
+<h3>还有这些</h3>
+<ul>
+<li>文件助手：收发文件、解压、服务器下载回传</li>
+<li>远程遥控：重启服务 / 封禁 IP，均带二次确认</li>
+<li>RSS 订阅推送、里程碑播报</li>
+</ul>
+</div>
+</div>
+
+<p class="eyebrow">定价</p>
+<h2>三档，怎么选都行</h2>
+<div class="pricing">
+<div class="card">
+<h3>Lite <span class="tag">免费</span></h3>
+<p class="price">¥0</p>
+<p>开源自助版：源码 + 一键安装脚本，3 分钟装好（Debian / Ubuntu）。包含“随时问它”和“它主动找你”的全部功能。</p>
+<p><a href="https://github.com/xiaobai111-hub/vps-guard-lite">GitHub 免费获取 →</a></p>
+</div>
+<div class="card featured">
+<h3>标准版 <span class="tag hot">前 10 单 ¥29.9</span></h3>
+<p class="price">¥49</p>
+<p>我远程帮你部署全功能版到你的 VPS，含配置调优 + 7 天答疑。Lite 的全部功能，再加流量月账本、配置看门狗、全链路自检、到期提醒、文件助手、远程遥控、RSS 推送。</p>
+<p class="muted">前 10 单 ¥29.9，条件是装完给我一句真实评价——好坏都行，原样贴出。</p>
+</div>
+<div class="card">
+<h3>维护 <span class="tag">可选</span></h3>
+<p class="price">¥9.9<span style="font-size:16px">/月</span></p>
+<p>更新、调整、故障优先处理。不续也不影响已装好的机器人继续跑。</p>
+</div>
+</div>
+<p class="muted">支付：支付宝 / 微信。</p>
+
+<p class="eyebrow">下单流程</p>
+<h2>四步，用上哨兵</h2>
+<ol class="steps">
+<li>Telegram 找 <a href="https://t.me/NebulaGuardCNBot">@NebulaGuardCNBot</a>，点 <code>/buy</code> 选档。</li>
+<li>选支付宝或微信，扫码付款（备注只填订单号）。</li>
+<li>把付款截图发给机器人，转我确认。</li>
+<li>我远程部署到你的 VPS，部署进度实时推送给你。</li>
+</ol>
+<p class="muted">先说清你的系统版本和想监控什么，我确认能做再收款，做不了不收钱。</p>
+
+<p class="eyebrow">安全</p>
+<h2>安全上怎么保证</h2>
+<ul>
+<li><strong>不要你的服务器密码。</strong>你按提示加一把临时 SSH 公钥，我部署完你立刻删掉，全程可旁观。</li>
+<li>Bot Token 只存在你服务器本地，不经过任何第三方；机器人只响应你本人的账号。</li>
+<li>纯 Python 标准库，零第三方依赖，常驻内存约 20MB；代码可审。</li>
+<li>要求：一台 Debian / Ubuntu VPS + 一个 Telegram 账号。其他系统先告诉我，能适配会明说，适配不了不收钱。</li>
+</ul>
+
+<p class="eyebrow">常见问题</p>
+<h2>先问清楚再下单</h2>
+<div class="faq">
+<p><strong>Q：机器人会不会偷跑流量、占资源？</strong></p>
+<p>A：纯 Python 标准库，无第三方依赖，常驻内存约 20MB，就是作者主力机在跑的同款。</p>
+<p><strong>Q：我的服务器不是 Debian / Ubuntu 怎么办？</strong></p>
+<p>A：先告诉我系统，能适配我会明说，适配不了不收钱。</p>
+<p><strong>Q：数据安全？</strong></p>
+<p>A：代码可审，Token 和数据都在你自己的服务器上，我这边不留任何副本。</p>
+</div>
+
+<div class="card" style="text-align:center">
+<h3>给你的 VPS 装个哨兵</h3>
+<p class="muted">先确认能做再收款，做不了不收钱。</p>
+<div class="btns" style="justify-content:center">
+<a class="btn btn-primary" href="https://t.me/NebulaGuardCNBot">Telegram 下单 @NebulaGuardCNBot</a>
+</div>
+<p><a href="https://github.com/xiaobai111-hub/vps-guard-lite">Lite 免费版 GitHub</a> · <a href="https://eleduck.com/posts/K7fazq">电鸭教程帖</a></p>
+</div>
+
+<footer>
+星穹哨兵 NEBULA · 个人开发者远程部署服务<br>
+Lite 版开源协议 MIT · 本页托管于作者自己的云电脑，仅作服务介绍
+</footer>
+
+</div>
+<div class="sticky-cta">
+<a class="btn btn-primary" href="https://t.me/NebulaGuardCNBot">Telegram 下单</a>
+<a class="btn btn-ghost" href="https://github.com/xiaobai111-hub/vps-guard-lite">Lite 免费版</a>
+</div>
+</body>
+</html>
